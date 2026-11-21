@@ -26,9 +26,10 @@ tauri-plugin-clipboard-manager = "2.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
-# 必须 vendored：默认会动态链接 Homebrew 的 libssl/libcrypto，
-# 别人机器上没装 openssl@3 就直接 dyld 崩，且与 hardened runtime 的库校验冲突。
-ssh2 = { version = "*", features = ["vendored-openssl"] }
+# ssh2 按平台分开声明（见文件末尾的 target 段）：
+# macOS 必须 vendored（默认会动态链接 Homebrew 的 libssl/libcrypto，别人机器上没装
+# openssl@3 就直接 dyld 崩），Windows 则走 libssh2 自带的 WinCNG —— 那条路不需要
+# OpenSSL，交叉编译也不会卡在「用 darwin 版 perl 配 VC-WIN64A」上。
 keyring = { version = "3", features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust", "vendored"] }
 aes-gcm = "0.10"
 argon2 = "0.5"
@@ -73,6 +74,14 @@ tokio-tungstenite = "0.24"
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.26"
 objc = "0.2"
+
+# SSH（日志模块）：macOS 用 vendored OpenSSL；Windows 交给 libssh2 的 WinCNG 后端，
+# 这样 Windows 包既不需要系统 OpenSSL，也能在 macOS 上交叉编译出来。
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+ssh2 = { version = "*", features = ["vendored-openssl"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+ssh2 = { version = "*", default-features = false }
 
 [features]
 default = ["custom-protocol"]
