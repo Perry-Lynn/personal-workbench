@@ -1,0 +1,50 @@
+/* Spring Boot 服务台样式（纯 token 驱动，跟随工作台深浅主题） */
+
+.spring-view {
+  padding: 20px 24px;
+  margin: 0;
+}
+
+/* ---- 一个服务一块 ---- */
+.spring-app {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  background: var(--wb-bg-overlay);
+}
+
+.spring-app-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/*
+ * 把「资源占用」推到最右边。
+ * flex-wrap 下这个占位块会自己换行，所以窄窗口时它只是变成一行空行，
+ * 不会把右边的信息挤掉。
+ */
+.spring-app-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.spring-cmd {
+  max-height: 240px;
+  overflow: auto;
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--wb-bg-code);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  color: var(--wb-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

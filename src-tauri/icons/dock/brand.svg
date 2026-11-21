@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    风格一 · brand：品牌翠绿。全部取自 wb-* 设计令牌，与 app 内主题一致。
+
+    ⚠️ 关键：背景圆角矩形**内缩**到 82~942（860×860，四周留 ~8% 透明边距）。
+    只缩小 W 不缩小背景是没用的 —— 其他程序的图标是「logo 居中 + 四周透明」，
+    而铺满画布的图标在 Dock 里视觉上就是会显得更大。
+    内容垂直整体居中于 512：彩条 y=235 / W 383~635 / 圆点 cy=767。
+  -->
+  <defs>
+    <linearGradient id="bg" x1="82" y1="82" x2="942" y2="942" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#191B20"/>
+      <stop offset="1" stop-color="#0A0B0D"/>
+    </linearGradient>
+    <radialGradient id="g1" cx="340" cy="300" r="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="740" cy="760" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wf" x1="0" y1="383" x2="0" y2="635" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#ECEDEF"/>
+    </linearGradient>
+    <linearGradient id="ac" x1="82" y1="0" x2="942" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="0" y1="82" x2="0" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sq">
+      <rect x="82" y="82" width="860" height="860" rx="187" ry="187"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect x="82" y="82" width="860" height="860" fill="url(#bg)"/>
+    <rect x="82" y="82" width="860" height="860" fill="url(#g1)"/>
+    <rect x="82" y="82" width="860" height="860" fill="url(#g2)"/>
+    <rect x="82" y="82" width="860" height="170" fill="url(#sh)"/>
+    <!-- 顶部彩条 -->
+    <rect x="372" y="235" width="280" height="12" rx="6" fill="url(#ac)" opacity="0.95"/>
+    <!-- W -->
+    <polyline points="312,383 432,635 512,391 592,635 712,383"
+              fill="none" stroke="url(#wf)" stroke-width="76"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 底部模块色点 -->
+    <circle cx="412" cy="767" r="22" fill="#22D3EE"/>
+    <circle cx="512" cy="767" r="22" fill="#A78BFA"/>
+    <circle cx="612" cy="767" r="22" fill="#60A5FA"/>
+  </g>
+</svg>

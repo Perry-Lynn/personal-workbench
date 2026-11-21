@@ -1,0 +1,83 @@
+/* Maven 助手模块样式（纯 token 驱动，跟随工作台深浅主题） */
+
+.maven-view {
+  padding: 20px 24px;
+  margin: 0;
+}
+
+/* ---- 体积排行条 ---- */
+.maven-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.maven-bar-label {
+  flex: 0 0 240px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.maven-bar-track {
+  flex: 1 1 auto;
+  height: 8px;
+  min-width: 60px;
+  background: var(--wb-bg-overlay);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.maven-bar-fill {
+  height: 100%;
+  background: var(--wb-brand);
+  border-radius: 4px;
+}
+
+.maven-bar-value {
+  flex: 0 0 130px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* ---- 依赖树 ---- */
+.maven-tree {
+  max-height: 420px;
+  overflow: auto;
+  padding: 8px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.9;
+}
+
+.maven-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* 被仲裁掉的那一行：划掉 + 变暗，一眼能从树里区分出来 */
+.maven-line-omit {
+  color: var(--wb-text-tertiary);
+  text-decoration: line-through;
+}
+
+.maven-dump {
+  max-height: 50vh;
+  overflow: auto;
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--wb-bg-code);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  color: var(--wb-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.6;
+  white-space: pre;
+}

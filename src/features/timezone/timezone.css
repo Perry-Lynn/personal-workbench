@@ -1,0 +1,453 @@
+/*
+ * 时区对比模块样式
+ * ------------------------------------------------------------------
+ * 颜色一律走 --wb-* 令牌，深浅两套主题都成立；
+ * 字号走 calc(var(--wb-font-base) ± Npx)，跟随设置里的基准字号。
+ *
+ * 版面：两块等宽面板 + 中间一枚箭头。窄窗口把箭头转 90° 并改成上下排列 ——
+ * 并排两块在 700px 以下每块只剩 320px，日期和时间会开始折行。
+ * @Author: fu
+ */
+
+.tz-view {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 22px 24px 34px;
+}
+
+/* =============================================
+   ====== 抬头 ======
+   ============================================= */
+.tz-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.tz-head-copy {
+  min-width: 0;
+}
+
+.tz-title {
+  margin: 0;
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) + 6px);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.tz-sub {
+  margin: 4px 0 0;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+/* 「跟随现在 / 已固定」：状态标签，不给它加粗边框，免得和两块面板抢注意力 */
+.tz-live-tag {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tz-notice {
+  margin-bottom: 12px;
+}
+
+/* =============================================
+   ====== 两块面板 ======
+   ============================================= */
+.tz-panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+}
+
+.tz-bridge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) + 3px);
+}
+
+.tz-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  padding: 15px 17px 13px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 12px;
+  background-color: var(--wb-bg-surface);
+}
+
+.tz-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tz-zone-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 缩写：PDT / PST / UTC-7。等宽数字，切换时不跳宽 */
+.tz-abbr {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 5px;
+  background-color: var(--wb-bg-overlay);
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) - 3px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  /* 悬停有说明，给个提示光标 —— 否则没人会去悬停它 */
+  cursor: help;
+}
+
+/* =============================================
+   ====== 夏令时开关 ======
+   =============================================
+   只对**真的实行夏令时**的时区可用。关掉 = 全年按标准时算：
+   大钟、日期、输入框、缩写全都换成标准档，两档并排那一行也随之消失。
+
+   不实行夏令时的时区（上海 / 东京）把开关置灰 —— 让用户能看见「这个时区没有
+   夏令时这回事」，比直接隐藏这个控件更清楚（隐藏会让人以为界面少了东西）。
+   ============================================= */
+.tz-dst-ctl {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tz-dst-ctl-label {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  white-space: nowrap;
+}
+
+/* 置灰用「换一档更弱的文字色」，不是给 tertiary 再叠 opacity ——
+   叠 opacity 会让对比度掉到读不清，而这一档本来就是装饰级 */
+.tz-dst-ctl.is-na {
+  cursor: default;
+}
+
+.tz-dst-ctl.is-na .tz-dst-ctl-label {
+  color: var(--wb-text-quaternary);
+}
+
+/* =============================================
+   ====== 缩写气泡 ======
+   =============================================
+   底色与文字色由 AntD Tooltip 给（`colorBgSpotlight` + 对比色），
+   这里只管排版与层级。副行用 opacity 弱化：不能改用 --wb-text-tertiary，
+   那是「页面背景上」的令牌，压在 tooltip 底色上对比度不成立。
+   ============================================= */
+.tz-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tz-tip-main {
+  font-size: calc(var(--wb-font-base) - 1px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.tz-tip-sub {
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.5;
+  opacity: 0.78;
+}
+
+/* =============================================
+   ====== 概念说明（原生 details，无动画） ======
+   ============================================= */
+.tz-note {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--wb-border-l1);
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) - 2px);
+  line-height: 1.75;
+}
+
+.tz-note-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--wb-text-tertiary);
+  cursor: pointer;
+  user-select: none;
+  /* 去掉系统三角，自己画一个能旋转的 */
+  list-style: none;
+  transition: color 0.12s ease;
+}
+
+.tz-note-head::-webkit-details-marker {
+  display: none;
+}
+
+.tz-note-head::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.14s ease;
+}
+
+.tz-note[open] > .tz-note-head::before {
+  transform: rotate(90deg);
+}
+
+.tz-note-head:hover {
+  color: var(--wb-text-secondary);
+}
+
+.tz-note-body {
+  margin-top: 9px;
+  padding-left: 13px;
+  /* 竖线把说明与主体分开：它是附注，不是第二块内容 */
+  border-left: 1px solid var(--wb-border-l1);
+  /*
+   * 限制行长：面板有 980px 宽，不限制的话一行能排到 70 个汉字，
+   * 读起来会串行。52em ≈ 730px ≈ 45 个汉字，是中文正文的舒适区间。
+   */
+  max-width: 52em;
+}
+
+.tz-note-body p {
+  margin: 0 0 8px;
+}
+
+.tz-note-body p:last-child {
+  margin-bottom: 0;
+}
+
+.tz-note-body b {
+  color: var(--wb-text-primary);
+  font-weight: 600;
+}
+
+.tz-note-body code {
+  padding: 0 4px;
+  border-radius: 4px;
+  /*
+   * 用 overlay 而不是 --wb-bg-code：后者是**代码面板**的底色（比页面更暗），
+   * 压在这段正文上像挖了个洞；行内代码要的是「浮在纸面上的小标签」，
+   * 和本模块的 .tz-abbr / .tz-nudge 同一档。
+   */
+  background-color: var(--wb-bg-overlay);
+  color: var(--wb-text-primary);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  font-size: 0.94em;
+}
+
+/* 用当前时区举例那一段：提到具体缩写，值得比正文重一档 */
+.tz-note-example {
+  color: var(--wb-text-primary);
+}
+
+.tz-city {
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) + 1px);
+  font-weight: 600;
+}
+
+.tz-date {
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) - 1.5px);
+}
+
+/* 大钟。tabular-nums 是关键：否则秒数跳动时整行左右抖 */
+.tz-clock {
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) + 22px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.tz-sec {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) + 4px);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* =============================================
+   ====== 两档钟点（标准时 / 夏令时） ======
+   =============================================
+   同一个瞬间按两档各写一次。**标准时在前**且用正文色加粗 —— 它是基准；
+   夏令时用三级色退后一格。不实行夏令时的时区没有这一行。
+   普通行内流：窄面板折行时，换行点落在「·」两侧的空格上。
+   ============================================= */
+.tz-tiers {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 1.5px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.tz-tiers .is-standard {
+  color: var(--wb-text-primary);
+  font-weight: 600;
+}
+
+.tz-tier-sep {
+  color: var(--wb-text-quaternary);
+}
+
+/* =============================================
+   ====== 编辑控件 ======
+   =============================================
+   用原生 date / time 输入：日历和时钟由系统给，键盘也能直接敲，
+   比自己拼三个下拉少一半代码、还自带校验。
+   代价是外观由系统决定 —— 所以显式设 color-scheme，
+   否则深色主题下原生日历会白得刺眼。
+   ============================================= */
+.tz-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tz-edit input {
+  min-width: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 7px;
+  background-color: var(--wb-bg-overlay);
+  color: var(--wb-text-primary);
+  font-family: inherit;
+  font-size: calc(var(--wb-font-base) - 2px);
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+html.light .tz-edit input {
+  color-scheme: light;
+}
+
+.tz-edit input:hover {
+  border-color: var(--wb-border-l2);
+}
+
+.tz-edit input:focus {
+  outline: none;
+  border-color: var(--wb-border-brand);
+  background-color: var(--wb-bg-hover);
+}
+
+/* ---- 加减按钮 ---- */
+.tz-nudges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tz-nudge {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--wb-bg-overlay);
+  color: var(--wb-text-secondary);
+  font-family: inherit;
+  font-size: calc(var(--wb-font-base) - 3px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.tz-nudge:hover {
+  background-color: var(--wb-bg-hover);
+  color: var(--wb-text-primary);
+}
+
+.tz-nudge:active {
+  background-color: var(--wb-bg-active);
+}
+
+/* ---- 夏令时说明：贴面板底部，两边对齐 ---- */
+.tz-dst {
+  margin-top: auto;
+  padding-top: 9px;
+  border-top: 1px solid var(--wb-border-l1);
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.5;
+}
+
+/* =============================================
+   ====== 底部小结 ======
+   ============================================= */
+.tz-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 0 2px;
+}
+
+.tz-summary-diff {
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) - 0.5px);
+  font-weight: 600;
+}
+
+.tz-summary-offsets {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 2.5px);
+  font-variant-numeric: tabular-nums;
+}
+
+.tz-dot {
+  margin: 0 6px;
+  opacity: 0.6;
+}
+
+/* =============================================
+   ====== 窄窗口：上下排列 ======
+   ============================================= */
+@media (max-width: 760px) {
+  .tz-view {
+    padding: 18px 16px 28px;
+  }
+
+  .tz-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tz-panes {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  /* 箭头转 90°，表示「下面是另一个时区」而不是「右边」 */
+  .tz-bridge {
+    transform: rotate(90deg);
+  }
+
+  .tz-clock {
+    font-size: calc(var(--wb-font-base) + 16px);
+  }
+}

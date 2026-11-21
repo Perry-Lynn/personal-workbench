@@ -1,0 +1,504 @@
+/*
+ * 个人工作台 · 核心样式表
+ * ------------------------------------------------------------------
+ * 这一层只放「全工作台共享」的东西：
+ *   1. 设计令牌（CSS 自定义属性 --wb-*）：双主题，Tailwind / AntD / 模块共用同一套值
+ *   2. 全局基础样式与滚动条
+ *   3. Mac 窗口拖拽辅助类
+ *   4. AntD 组件全局微调
+ *   5. 共享工具类（.wb-surface / .wb-card-hover / .sider-toggle-btn）
+ *
+ * 各功能模块自己的样式请放在模块目录下（如 src/features/logsight/logsight.css），
+ * 由模块入口自行 import，不要写进本文件。
+ *
+ * 主题切换：html/body 上的 .dark / .light class 由 useWorkbenchStore.setTheme 维护。
+ * @Author: fu
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   ====== 设计令牌：深色主题（默认） ======
+   ============================================= */
+:root,
+  html, body {
+  /* Overlay 标题栏下 macOS 交通灯浮在最左 ~78px，TopBar 据此留位 */
+  --wb-traffic-light-w: 78px;
+}
+
+
+html.dark {
+  /*
+   * 背景层（中性墨黑，减少蓝灰与纯黑的对立感）
+   *
+   * ⚠️ 这五档是**一条从下往上的阶梯**，改任何一档都要重看整条：
+   *   sider(#0E0F12) < base(#131519) < surface(#1A1D23) < secondary(#1E2128) < elevated(#20242B)
+   *
+   * 为什么 base 不再是 #0A0B0D：那是接近纯黑的 #0A0B0D，而侧栏是 #0E0F12 ——
+   * **正文区比外壳还黑**，整块内容看起来像屏幕上的一个洞。用户的原话是
+   * 「深色主题时正文中间的黑色背景太黑了」。内容区是一页纸，它应该比
+   * 外壳（侧栏 / 顶栏）**略亮**，而不是更暗；现在 sider < base，层级反过来才对。
+   *
+   * 抬底之后 surface 必须跟着抬，否则 .home-now 这类面板会比页面还暗，
+   * 变成「凹槽」而不是「浮起的卡片」。
+   */
+  --wb-bg-base: #131519;
+  --wb-bg-surface: #1A1D23;
+  --wb-bg-elevated: #20242B;
+  --wb-bg-secondary: #1E2128;
+  --wb-bg-sider: #0E0F12;
+  /*
+   * 外壳半透明底（配合 macOS 磨砂玻璃）。只给「侧栏 + 顶栏」用 ——
+   * 内容面板继续用不透明的 --wb-bg-base，否则正文压在模糊背景上会难读。
+   *
+   * alpha 是唯一的观感旋钮，但**它基本不影响可读性**（已验算）：
+   * 材质生效时合成色 = alpha×本令牌 + (1-alpha)×材质，而材质本身就接近外壳底色，
+   * 所以怎么调，模块名的对比度都在 6:1 以上。它真正决定的是「桌面的模糊透上来多少」。
+   *   调低 -> 玻璃感更强    调高 -> 更接近原来的不透明外壳
+   *
+   * 唯一例外是原生材质**失效**（窗口透明、桌面直接透上来）：那时对比度会掉到
+   * 3:1 上下，而且**光靠调 alpha 救不回来**（浅色主题遇深色桌面尤其明显，
+   * 即便 alpha 提到 0.90 也只有 2.8:1）。所以取偏保守的 0.78，
+   * 并依赖 `tauri build` 在编译期校验 windowEffects 配置 —— 那才是真正的防线。
+   */
+  --wb-glass-chrome: rgba(16, 17, 21, 0.78);
+  /* 抬底之后，白 alpha 叠出来的层级会变弱，各提一档补回来 */
+  --wb-bg-overlay: rgba(255, 255, 255, 0.06);
+  --wb-bg-code: #101216;
+  --wb-bg-hover: rgba(255, 255, 255, 0.055);
+  --wb-bg-active: rgba(52, 211, 153, 0.10);
+  --wb-bg-selected: rgba(52, 211, 153, 0.13);
+
+  /* 文字层 */
+  --wb-text-primary: #ECEDEF;
+  --wb-text-secondary: #989BA4;
+  /*
+   * tertiary 原来取 #5F626B，在旧的 --wb-bg-base 上只有 3.2:1，
+   * 低于 WCAG AA 正文的 4.5:1 —— 深色主题下所有「说明性灰字」（模块描述、
+   * 分组标题、面板副行）都糊成一片，实测肉眼几乎读不出来。
+   *
+   * 现取 #8D919A，在抬底后的五档背景上分别实测：
+   *   base 5.79 / surface 5.35 / secondary 5.10 / elevated 4.93 / code 5.94
+   * 全部 ≥4.5:1，且仍明显低于 secondary(#989BA4, 6.58:1)，三档层级没有塌。
+   * ⚠️ 抬底会**压低**所有文字对比度，所以调背景色时必须回来复算这一档 ——
+   *    用旧值 #858992 在 elevated 上只剩 4.38:1，刚好掉到 AA 以下。
+   * 真需要「几乎不可见」的场合请用 --wb-text-quaternary。
+   */
+  --wb-text-tertiary: #8D919A;
+  --wb-text-quaternary: rgba(236, 237, 239, 0.30);
+  --wb-text-brand: #34D399;
+  --wb-text-inverse: #06281D;
+
+  /* 边框层（发丝级） */
+  --wb-border-l1: rgba(255, 255, 255, 0.07);
+  --wb-border-l2: rgba(255, 255, 255, 0.12);
+  --wb-border-brand: rgba(52, 211, 153, 0.40);
+
+  /* 品牌色（翠绿，去光晕，作唯一强调色） */
+  --wb-brand: #34D399;
+  --wb-brand-hover: #2FBF87;
+  --wb-brand-active: #059669;
+  --wb-brand-cyan: #22D3EE;
+  --wb-brand-lilac: #A78BFA;
+  --wb-brand-blue: #60A5FA;
+
+  /* 状态色 */
+  --wb-success: #34D399;
+  --wb-warning: #FBBF24;
+  --wb-error: #F87171;
+  --wb-info: #60A5FA;
+
+  /* 阴影（克制，靠描边分层） */
+  --wb-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --wb-shadow-float: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --wb-shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --wb-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  /*
+   * AntD 浮层（Tooltip / Popover）与滚动条的取值。
+   *
+   * 单独成 token 而不复用 --wb-bg-elevated：浮层是「压在内容之上的一层」，
+   * 层级与内容面板不同（浅色下它是纯白、深色下比面板更亮），取值就是原先
+   * 写死在覆盖规则里的那一套，所以外观零变化 —— 变的只是「谁说了算」。
+   */
+  --wb-overlay-bg: #2A2D31;
+  --wb-overlay-text: #E8EAED;
+  --wb-overlay-border: rgba(232, 234, 237, 0.10);
+  --wb-overlay-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  --wb-scrollbar-thumb: rgba(148, 163, 184, 0.18);
+  --wb-scrollbar-thumb-hover: rgba(148, 163, 184, 0.32);
+
+  /* 模块级可覆盖变量 */
+  --wb-log-font-size: 12.5px;
+}
+
+/* =============================================
+   ====== 设计令牌：浅色主题 ======
+   ============================================= */
+html.light {
+  /* 背景层（纸白，避免纯白刺眼） */
+  --wb-bg-base: #F7F8F8;
+  --wb-bg-surface: #FFFFFF;
+  --wb-bg-elevated: #FFFFFF;
+  --wb-bg-secondary: #F2F3F4;
+  --wb-bg-sider: #F2F3F4;
+  --wb-glass-chrome: rgba(255, 255, 255, 0.85);
+  --wb-bg-overlay: rgba(16, 24, 40, 0.03);
+  --wb-bg-code: #F2F3F4;
+  --wb-bg-hover: rgba(16, 24, 40, 0.04);
+  --wb-bg-active: rgba(13, 148, 136, 0.08);
+  --wb-bg-selected: rgba(13, 148, 136, 0.10);
+
+  /*
+   * 文字层
+   *
+   * tertiary 原为 #8A8D96：在 --wb-bg-base(#F7F8F8) 上只有 3.1:1、纯白上 3.3:1，
+   * 低于 WCAG AA 正文的 4.5:1 —— 浅色主题下所有「说明性灰字」（模块描述、分组标题、
+   * 面板副行、页脚）整体偏淡。提到 #6B6F78 后：base 4.7:1、sider(#F2F3F4) 4.5:1、
+   * 纯白 5.0:1。
+   * secondary 同步从 #565A63 压到 #4E525B（6.5:1 -> 7.4:1），否则它与提亮后的
+   * tertiary 只差 1.4 倍，三档层级会塌成一档。现在是 16.9 / 7.4 / 4.7。
+   * 真需要「几乎不可见」的场合（行号、分隔符）请用 --wb-text-quaternary。
+   *
+   * text-brand 原为 #0D9488（base 上 3.5:1），作为**文字**用不达标；
+   * 改用同色系的 #0F766E（5.1:1）。--wb-brand 仍是 #0D9488 ——
+   * 它承担的是填充与图形，不是文字，两件事不必同一个值。
+   */
+  --wb-text-primary: #16171A;
+  --wb-text-secondary: #4E525B;
+  --wb-text-tertiary: #6B6F78;
+  --wb-text-quaternary: rgba(22, 23, 26, 0.30);
+  --wb-text-brand: #0F766E;
+  --wb-text-inverse: #FFFFFF;
+
+  /* 边框层（发丝级） */
+  --wb-border-l1: rgba(16, 24, 40, 0.09);
+  --wb-border-l2: rgba(16, 24, 40, 0.14);
+  --wb-border-brand: rgba(13, 148, 136, 0.35);
+
+  /* 品牌色（深青碧，沉稳专业） */
+  --wb-brand: #0D9488;
+  --wb-brand-hover: #0F766E;
+  --wb-brand-active: #115E59;
+  --wb-brand-cyan: #0891B2;
+  --wb-brand-lilac: #7C3AED;
+  --wb-brand-blue: #2563EB;
+
+  /*
+   * 状态色
+   * warning 原为 #D97706：在 base 上只有 3.0:1，连「非文字 UI 元素 3:1」都没过；
+   * 它还被当文字用（首页「N 处待提交」）和当底色用（侧栏角标配 --wb-text-inverse），
+   * 后者白字压在 #D97706 上只有 3.2:1。压到 #B45309 后两个场景都是 4.7:1。
+   */
+  --wb-success: #059669;
+  --wb-warning: #B45309;
+  --wb-error: #DC2626;
+  --wb-info: #2563EB;
+
+  /* 阴影（克制，靠描边分层） */
+  --wb-shadow-panel: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --wb-shadow-float: 0 20px 44px rgba(16, 24, 40, 0.12);
+  --wb-shadow-btn: 0 1px 2px rgba(13, 148, 136, 0.18);
+  --wb-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  /* AntD 浮层与滚动条（浅色主题取值，见深色块同名令牌的说明） */
+  --wb-overlay-bg: #FFFFFF;
+  --wb-overlay-text: #0F172A;
+  --wb-overlay-border: rgba(15, 23, 42, 0.12);
+  --wb-overlay-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --wb-scrollbar-thumb: rgba(100, 116, 139, 0.20);
+  --wb-scrollbar-thumb-hover: rgba(100, 116, 139, 0.36);
+}
+
+/* =============================================
+   ====== 全局基础样式 ======
+   ============================================= */
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /*
+   * 必须是透明的：磨砂玻璃由原生 NSVisualEffectView 画在**网页下面**，
+   * 网页这一层只要有任何不透明底色就会把它整块盖住。
+   * 内容区的底色由 AppShell 的 <main> 与 ModulePane 自己负责（都是不透明的）。
+   */
+  background-color: transparent;
+  color: var(--wb-text-primary);
+  font-family:
+    'SF Pro Text', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'Helvetica Neue', Helvetica, Segoe UI, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* =============================================
+   ====== 滚动条：Mac 风格（双主题适配） ======
+   ============================================= */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--wb-scrollbar-thumb);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--wb-scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: var(--wb-scrollbar-thumb);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: var(--wb-scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+/* =============================================
+   ====== Mac 风格窗口拖拽区 ======
+   ============================================= */
+/*
+ * ⚠️ 这两条**不再有 CSS 效果**，只作为**标记**被 `shell/titlebarDrag.ts` 读取。
+ *
+ * 曾经这里写的是 `-webkit-app-region: drag/no-drag` —— 那是 **Electron / Chromium
+ * 专有**的属性，本应用的 WebView 是 WKWebView，**不认它**。于是「拖顶栏」从来没生效过，
+ * 而代码里到处挂着 no-drag，看起来又像已经处理过了，排查时极易被带偏。
+ * 现在拖动由 mousedown 处理函数负责（`startDragging()`），这两个类名降级为选择器：
+ *   .mac-titlebar-drag  拖动带的标记（挂在顶栏与侧栏品牌块上）
+ *   .mac-titlebar-nd    这一块**不要**拖（挂在按钮/输入块上）
+ * 保留类名是为了不动 ~25 处调用点；新增可交互控件时照旧挂 `mac-titlebar-nd`。
+ */
+.mac-titlebar-drag {
+  user-select: none;
+}
+.mac-titlebar-nd {
+  user-select: auto;
+}
+
+/* =============================================
+   ====== Ant Design 组件微调 ======
+   ============================================= */
+.ant-tabs-nav {
+  margin-bottom: 0 !important;
+}
+
+/* Sider 边框 */
+.ant-layout-sider {
+  border-right: 1px solid var(--wb-border-l1) !important;
+}
+
+/* Header 边框 */
+.ant-layout-header {
+  border-bottom: 1px solid var(--wb-border-l1) !important;
+}
+
+/* Menu 项圆角 */
+.ant-menu-item {
+  border-radius: 6px !important;
+  margin: 2px 8px !important;
+}
+
+/* =============================================
+   ====== Tooltip 强制样式覆盖（解决白底白字 + 初次出现抖动）
+          V12.3：三层全覆盖 + 多重 specificity 硬刚 AntD CSS-in-JS
+   ============================================= */
+.ant-tooltip,
+div[class*="ant-tooltip"] {
+  /* 抗抖动：稳定渲染层，避免出现时从 0px 弹跳 */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+.ant-tooltip .ant-tooltip-content,
+.ant-tooltip .ant-tooltip-inner,
+div[class*="ant-tooltip"] div[class*="-content"],
+div[class*="ant-tooltip"] div[class*="-inner"] {
+  /* 使用字体反锯齿，避免缩放时粗细变化导致视觉抖动 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+  box-sizing: border-box;
+}
+
+/* ====== 深色模式 Tooltip（强制覆盖，三层全量兜底） ====== */
+/* specificity 等级 1：双 class 组合 */
+html.dark .ant-tooltip .ant-tooltip-content,
+html.dark .ant-tooltip .ant-tooltip-inner,
+body.dark .ant-tooltip .ant-tooltip-content,
+body.dark .ant-tooltip .ant-tooltip-inner {
+  background: var(--wb-overlay-bg) !important;
+  background-color: var(--wb-overlay-bg) !important;
+  color: var(--wb-overlay-text) !important;
+  border: 1px solid var(--wb-overlay-border) !important;
+  box-shadow: var(--wb-overlay-shadow) !important;
+}
+/* specificity 等级 2：直接子元素（更高优先级，覆盖 AntD 默认浅色底） */
+html.dark body.dark div.ant-tooltip > div.ant-tooltip-content > div.ant-tooltip-inner,
+html.dark div.ant-tooltip > div.ant-tooltip-content {
+  background: var(--wb-overlay-bg) !important;
+  background-color: var(--wb-overlay-bg) !important;
+  color: var(--wb-overlay-text) !important;
+}
+/* 箭头：三层 specificity 叠加 */
+html.dark .ant-tooltip .ant-tooltip-arrow::before,
+body.dark .ant-tooltip .ant-tooltip-arrow::before,
+html.dark body.dark div.ant-tooltip > div.ant-tooltip-content > div.ant-tooltip-arrow::before {
+  background-color: var(--wb-overlay-bg) !important;
+  background: var(--wb-overlay-bg) !important;
+}
+html.dark .ant-tooltip-placement-top .ant-tooltip-arrow::before,
+html.dark .ant-tooltip-placement-topLeft .ant-tooltip-arrow::before,
+html.dark .ant-tooltip-placement-topRight .ant-tooltip-arrow::before {
+  border-bottom-color: var(--wb-overlay-border) !important;
+  border-right-color: var(--wb-overlay-border) !important;
+}
+html.dark .ant-tooltip-placement-bottom .ant-tooltip-arrow::before,
+html.dark .ant-tooltip-placement-bottomLeft .ant-tooltip-arrow::before,
+html.dark .ant-tooltip-placement-bottomRight .ant-tooltip-arrow::before {
+  border-top-color: var(--wb-overlay-border) !important;
+  border-left-color: var(--wb-overlay-border) !important;
+}
+html.dark .ant-tooltip-placement-left .ant-tooltip-arrow::before {
+  border-right-color: var(--wb-overlay-border) !important;
+  border-top-color: var(--wb-overlay-border) !important;
+}
+html.dark .ant-tooltip-placement-right .ant-tooltip-arrow::before {
+  border-left-color: var(--wb-overlay-border) !important;
+  border-bottom-color: var(--wb-overlay-border) !important;
+}
+
+/* ====== 浅色模式 Tooltip（强制覆盖：白底 + 黑字）
+          取值见 --wb-overlay-bg / --wb-overlay-text，对比度 WCAG AAA
+   ====== */
+/* specificity 等级 1：html/body 双 light class */
+html.light .ant-tooltip .ant-tooltip-content,
+html.light .ant-tooltip .ant-tooltip-inner,
+body.light .ant-tooltip .ant-tooltip-content,
+body.light .ant-tooltip .ant-tooltip-inner,
+html[class~="light"] div[class~="ant-tooltip"] div[class~="ant-tooltip-content"],
+html[class~="light"] div[class~="ant-tooltip"] div[class~="ant-tooltip-inner"] {
+  background: var(--wb-overlay-bg) !important;
+  background-color: var(--wb-overlay-bg) !important;
+  color: var(--wb-overlay-text) !important;
+  border: 1px solid var(--wb-overlay-border) !important;
+  box-shadow: var(--wb-overlay-shadow) !important;
+}
+/* specificity 等级 2：直接子元素，硬刚 AntD CSS-in-JS 的 inline 注入样式 */
+html.light body.light div.ant-tooltip > div.ant-tooltip-content > div.ant-tooltip-inner,
+html.light body.light div.ant-tooltip > div.ant-tooltip-content {
+  background: var(--wb-overlay-bg) !important;
+  background-color: var(--wb-overlay-bg) !important;
+  color: var(--wb-overlay-text) !important;
+}
+/* specificity 等级 3：再加一层伪类后缀，覆盖任何后注入的样式 */
+html.light:not(.dark) body.light:not(.dark) div.ant-tooltip.ant-tooltip-placement-bottom > div.ant-tooltip-content,
+html.light:not(.dark) body.light:not(.dark) div.ant-tooltip.ant-tooltip-placement-top > div.ant-tooltip-content,
+html.light:not(.dark) body.light:not(.dark) div.ant-tooltip.ant-tooltip-placement-left > div.ant-tooltip-content,
+html.light:not(.dark) body.light:not(.dark) div.ant-tooltip.ant-tooltip-placement-right > div.ant-tooltip-content,
+html.light:not(.dark) body.light:not(.dark) div.ant-tooltip > div.ant-tooltip-content > div.ant-tooltip-inner {
+  background: var(--wb-overlay-bg) !important;
+  background-color: var(--wb-overlay-bg) !important;
+  color: var(--wb-overlay-text) !important;
+}
+/* 箭头：同样三层 specificity 叠加 */
+html.light .ant-tooltip .ant-tooltip-arrow::before,
+body.light .ant-tooltip .ant-tooltip-arrow::before,
+html.light body.light div.ant-tooltip > div.ant-tooltip-content > div.ant-tooltip-arrow::before {
+  background-color: var(--wb-overlay-bg) !important;
+  background: var(--wb-overlay-bg) !important;
+}
+/* 浅色模式箭头边框统一（避免浅色边框露馅） */
+html.light .ant-tooltip-placement-top .ant-tooltip-arrow::before,
+html.light .ant-tooltip-placement-topLeft .ant-tooltip-arrow::before,
+html.light .ant-tooltip-placement-topRight .ant-tooltip-arrow::before {
+  border-bottom-color: var(--wb-overlay-border) !important;
+  border-right-color: var(--wb-overlay-border) !important;
+}
+html.light .ant-tooltip-placement-bottom .ant-tooltip-arrow::before,
+html.light .ant-tooltip-placement-bottomLeft .ant-tooltip-arrow::before,
+html.light .ant-tooltip-placement-bottomRight .ant-tooltip-arrow::before {
+  border-top-color: var(--wb-overlay-border) !important;
+  border-left-color: var(--wb-overlay-border) !important;
+}
+html.light .ant-tooltip-placement-left .ant-tooltip-arrow::before {
+  border-right-color: var(--wb-overlay-border) !important;
+  border-top-color: var(--wb-overlay-border) !important;
+}
+html.light .ant-tooltip-placement-right .ant-tooltip-arrow::before {
+  border-left-color: var(--wb-overlay-border) !important;
+  border-bottom-color: var(--wb-overlay-border) !important;
+}
+/* 终极兜底：Tooltip 内所有元素的文字强制黑色，防止被任何样式洗白 */
+html.light .ant-tooltip *,
+html.light .ant-tooltip-inner *,
+html.light div[class*="ant-tooltip"] div[class*="-inner"] * {
+  color: var(--wb-overlay-text) !important;
+  -webkit-text-fill-color: var(--wb-overlay-text) !important;
+}
+html.dark .ant-tooltip *,
+html.dark .ant-tooltip-inner *,
+html.dark div[class*="ant-tooltip"] div[class*="-inner"] * {
+  color: var(--wb-overlay-text) !important;
+  -webkit-text-fill-color: var(--wb-overlay-text) !important;
+}
+
+/* =============================================
+   ====== 共享工具类（所有模块可用） ======
+   ============================================= */
+html.dark .wb-surface {
+  background-color: var(--wb-bg-surface);
+  border: 1px solid var(--wb-border-l1);
+}
+html.light .wb-surface {
+  background-color: var(--wb-bg-surface);
+  border: 1px solid var(--wb-border-l1);
+  box-shadow: var(--wb-shadow-panel);
+}
+
+html.dark .wb-card-hover:hover {
+  background-color: var(--wb-bg-hover);
+  border-color: var(--wb-border-l2);
+}
+html.light .wb-card-hover:hover {
+  background-color: var(--wb-bg-hover);
+  border-color: var(--wb-border-l2);
+}
+
+/* =============================================
+   ====== 侧边栏收起/展开按钮动画 ======
+   ============================================= */
+.sider-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wb-bg-hover) !important;
+  border: 1px solid var(--wb-border-l1) !important;
+  color: var(--wb-text-secondary) !important;
+  transition: all 0.2s cubic-bezier(.2,.8,.2,1);
+}
+.sider-toggle-btn:hover {
+  background: var(--wb-border-l2) !important;
+  border-color: var(--wb-border-brand) !important;
+  color: var(--wb-text-primary) !important;
+  transform: scale(1.08);
+}
+.sider-toggle-btn:active {
+  transform: scale(0.95);
+}
+.sider-toggle-icon {
+  display: inline-flex;
+  transition: transform 0.3s cubic-bezier(.2,.8,.2,1);
+}

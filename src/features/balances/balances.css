@@ -1,0 +1,540 @@
+/* 智能体余额模块样式（纯 token 驱动，跟随工作台深浅主题） */
+
+.balances-root {
+  padding: 24px 28px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.balances-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.balances-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--wb-text-primary);
+}
+
+.balances-title-icon {
+  font-size: 22px;
+  color: var(--wb-brand);
+}
+
+.balances-subtitle {
+  margin: 4px 0 16px;
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+.balances-tip {
+  margin-bottom: 16px;
+}
+
+.balances-toolbar {
+  margin-bottom: 16px;
+}
+
+.balances-autopush {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 「（上次推送：3 分钟前）」—— 让用户看到后台自动推送确实在工作 */
+.balances-pushed-hint {
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-empty {
+  margin-top: 40px;
+}
+
+.balances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.balances-card {
+  height: 100%;
+}
+
+/*
+ * 字号放大后 Card title 里的 Tag 会变高，AntD 默认 header 高度固定会裁切。
+ * 强制 header 自适应高度，并给 padding 一点弹性空间。
+ * extra 里的按钮组在字号大时可能也超宽 —— 在 BalancesView.tsx 里给 <Space> 加 wrap。
+ */
+.balances-card .ant-card-head,
+.balances-card .ant-card-head-wrapper {
+  min-height: auto !important;
+  height: auto !important;
+  padding: 12px 16px;
+}
+
+.balances-card-desc {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+  margin-bottom: 12px;
+}
+
+.balances-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.balances-metric-label {
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-metric-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--wb-text-primary);
+  line-height: 1.3;
+}
+
+.balances-metric-sub {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+}
+
+.balances-refreshed {
+  margin-top: 10px;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+}
+
+.balances-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-modal-tip {
+  margin-bottom: 12px;
+}
+
+/* 「偏好设置」弹窗：每个设置项一组，组间留白 + 分隔线 */
+.balances-config-block {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--wb-border-l1);
+}
+
+/* 最后一组（平台勾选）自带 actions 分隔线，不必再叠一条 */
+.balances-config-block:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.balances-config-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.balances-config-desc {
+  display: block;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.6;
+}
+
+/* 间隔选择：预设下拉 +（选了「自定义…」才出现的）数字输入框 */
+.balances-config-interval {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* margin-top 交给外层 .balances-config-interval，这里只定宽度 */
+.balances-config-select {
+  min-width: 140px;
+}
+
+.balances-config-number {
+  width: 132px;
+}
+
+/* 单平台刷新间隔的一行：名字 + 下拉 + （自定义时）输入框 */
+.balances-provider-interval {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.balances-provider-interval-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(var(--wb-font-base) - 1px);
+}
+
+/* 动作行后面的补充说明（如「徽章未连接，测试提醒不可用」） */
+.balances-config-actions + .balances-config-desc {
+  margin-top: 8px;
+}
+
+/* 「额度提醒」块里的已提醒档位列表 */
+.balances-alert-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.balances-alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: calc(var(--wb-font-base) - 3px);
+  color: var(--wb-text-secondary);
+}
+
+.balances-alert-where {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.balances-alert-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* 平台勾选列表 */
+.balances-provider-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.balances-config-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--wb-border-l1);
+}
+
+.balances-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/*
+ * 「一键抓取登录态」：按钮与说明排成一行 —— 说明文字是按钮的补充（要等多久、
+ * 会弹窗），和按钮分两行看容易被当成正文忽略。
+ */
+.balances-grab {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.balances-grab-hint {
+  flex: 1 1 240px;
+  font-size: calc(var(--wb-font-base) - 4px);
+  line-height: 1.5;
+}
+
+/* ---- 系统菜单栏配置（预览 + 平台/字段） ---- */
+
+/*
+ * 实时预览条。菜单栏上到底会显示成什么样，光看说明文字想象不出来 ——
+ * 尤其「每一格长什么样、一共有几格」，不给预览用户就得改一次、切出去抬头看一眼。
+ */
+.balances-tray-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--wb-bg-sunken, rgba(127, 127, 127, 0.08));
+}
+
+.balances-tray-preview-label {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  flex-shrink: 0;
+}
+
+/*
+ * 徽章推送预览。与菜单栏预览同一个思路：**光看勾选框想象不出徽章上长什么样**。
+ * 尤其「正文只有 95 字节」这件事 —— 不给出实际字节数，用户只能靠猜，
+ * 而猜错了的表现是「推送总是报正文过长」，界面上却看不出原因。
+ */
+.balances-push-preview {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--wb-bg-sunken, rgba(127, 127, 127, 0.08));
+}
+
+.balances-push-preview-label {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  flex-shrink: 0;
+}
+
+/* 预览正文：这是徽章上**逐字**显示的内容，所以用等宽字体，看得清字节 */
+.balances-push-preview-text {
+  flex: 1;
+  min-width: 0;
+  color: var(--wb-text-primary);
+  font-family: var(--wb-font-mono, monospace);
+  font-size: calc(var(--wb-font-base) - 2px);
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.balances-push-preview-none {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-push-preview-cols {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  flex-shrink: 0;
+}
+
+/*
+ * 一格一个框 —— **框本身是有信息的**：菜单栏上每个平台是**独立的状态项**，
+ * 不加框的话这一排字看起来像一整段，用户会以为还是旧版那种「一行文字」。
+ */
+.balances-tray-preview-strip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.balances-tray-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 5px;
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) - 2px);
+  white-space: nowrap;
+}
+
+.balances-tray-chip-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.balances-tray-preview-none {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-tray-preview-cols {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  flex-shrink: 0;
+}
+
+/*
+ * 图标大小的控制行。滑块必须定宽 —— `.balances-config-head` 是 space-between，
+ * 不给宽度的话滑块会被拉满整行，「重置」按钮被顶到最右，看不出是一组控件。
+ */
+.balances-tray-size-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.balances-tray-size-slider {
+  width: 150px;
+}
+
+/* 一行一个平台：勾选是否上菜单栏 / 图标开关 / 自定义名字 / 显示哪个指标 */
+.balances-tray-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.balances-tray-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 平台名长短不一（"Trae" vs "WorkBuddy"），包一层固定宽度，右边的控件才能上下对齐 */
+.balances-tray-pick {
+  flex-shrink: 0;
+  min-width: 132px;
+}
+
+/* 图标开关那一组：左边是**会画上去的那个字形**（改名时跟着变），右边是开关 */
+.balances-tray-icon-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.balances-tray-glyph {
+  display: block;
+  flex-shrink: 0;
+  /* 图标本身是白字透明底（模板图语义），预览时已按主题染过色，
+     这里只负责在「关掉」时压暗，让状态一眼可见 */
+  transition: opacity 0.15s ease;
+}
+
+.balances-tray-glyph-off {
+  opacity: 0.25;
+}
+
+/* 自定义名字：占满中间的剩余空间，但别长到把下拉挤走 */
+.balances-tray-label {
+  flex: 1;
+  min-width: 0;
+  max-width: 150px;
+}
+
+.balances-tray-field {
+  min-width: 190px;
+  flex-shrink: 0;
+}
+
+/* 当前没有数据的平台：勾选框禁用，名字也压暗一档 */
+.balances-tray-name-off {
+  color: var(--wb-text-tertiary);
+}
+
+/* =============================================
+   ====== 「偏好设置」弹窗（Tabs 化） ======
+   ============================================= */
+/*
+ * AntD Modal 默认 body 高度自适应内容，但「菜单栏」tab 在平台多时会撑高整张弹窗。
+ * 给 body 一个最大高度，超出部分在弹窗内部滚动 —— 用户感受仍是固定大小的卡片，
+ * 不会顶到屏幕顶部把顶栏也遮掉。
+ */
+.balances-prefs-modal .ant-modal-body {
+  max-height: min(72vh, 620px);
+  overflow-y: auto;
+}
+
+/*
+ * Tab pane 内只剩一个 .balances-config-block，去掉它和 tab pane 顶部之间的重复间距。
+ * 原 CSS 是为「四个块纵向摞」设计的，单 tab 场景下底部 padding/margin 是空转。
+ */
+.balances-prefs-modal .ant-tabs-tabpane > .balances-config-block {
+  padding-bottom: 4px;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* =============================================
+   ====== 配置弹窗 · 「首页」页签 ======
+   =============================================
+   三行「标签 + 下拉」，加一块预览。预览的底色与「推送」页的预览同一档
+   （--wb-bg-sunken 缺失时用半透明灰兜底，两处写法保持一致）。
+   ============================================= */
+.balances-home-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.balances-home-select {
+  min-width: 200px;
+  max-width: 62%;
+}
+
+.balances-home-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--wb-bg-sunken, rgba(127, 127, 127, 0.08));
+}
+
+.balances-home-preview-label {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+}
+
+.balances-home-preview-none {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+.balances-home-preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* 与首页格子同口径：大数字 + 等宽数字，颜色由 healthColor 给 */
+.balances-home-preview-value {
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) + 6px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.balances-home-preview-sub {
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+}
+
+.balances-home-preview-bar {
+  display: block;
+  width: 160px;
+  height: 3px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--wb-bg-overlay);
+  overflow: hidden;
+}
+
+.balances-home-preview-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--wb-brand, #34d399);
+}

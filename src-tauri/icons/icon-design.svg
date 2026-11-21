@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    个人工作台 · Dock 图标设计稿
+    所有色彩全部来自 src/index.css 的设计令牌（wb-*），与 app 内主题契合：
+      底色     wb-bg-base     #0A0B0D  → wb-bg-elevated   #191B20
+      顶栏     wb-brand       #34D399  → wb-brand-cyan    #22D3EE
+      W 字色   wb-text-primary   #ECEDEF
+      模块点   wb-brand-cyan / lilac / blue  #22D3EE / #A78BFA / #60A5FA
+      光晕     wb-brand       #34D399  翠绿（呼应 app 内的 wb-glow-brand 阴影）
+    外框是 macOS-style squircle（rx=224 ≈ 21.9%，匹配 Big Sur continuous curve），
+    自带圆角不依赖系统蒙版（之前用方形画布，系统套蒙版没生效导致出现"长方形+边框"）。
+  -->
+  <defs>
+    <!-- 中性墨黑渐变（与 wb-bg-base → wb-bg-elevated 一致） -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#191B20"/>
+      <stop offset="1" stop-color="#0A0B0D"/>
+    </linearGradient>
+    <!-- 品牌翠绿光晕（左上，呼应 wb-glow-brand） -->
+    <radialGradient id="glowBrand" cx="300" cy="260" r="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 青辅助光晕（右下，丰富层次） -->
+    <radialGradient id="glowCyan" cx="800" cy="820" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <!-- W 字标：纯白到 wb-text-primary -->
+    <linearGradient id="wfill" x1="0" y1="320" x2="0" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#ECEDEF"/>
+    </linearGradient>
+    <!-- 顶部彩条：品牌翠绿 → 品牌青 -->
+    <linearGradient id="accent" x1="0" y1="0" x2="1024" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <!-- 顶部柔光（让 squircle 有立体感） -->
+    <linearGradient id="topShine" x1="0" y1="0" x2="0" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- macOS squircle 圆角矩形（rx=224 ≈ 21.9%，外框自带圆角，不依赖系统蒙版） -->
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="1024" height="1024" rx="224" ry="224"/>
+    </clipPath>
+  </defs>
+
+  <!-- 一切内容都在 squircle 内部，保证不会被裁切或漏边 -->
+  <g clip-path="url(#squircle)">
+    <!-- 背景层 -->
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#bg)"/>
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glowBrand)"/>
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glowCyan)"/>
+    <!-- 顶部柔光（让 squircle 上沿有"金属边"质感） -->
+    <rect x="0" y="0" width="1024" height="200" fill="url(#topShine)"/>
+
+    <!-- 顶部品牌彩条（"标签"感） -->
+    <rect x="320" y="248" width="384" height="14" rx="7" fill="url(#accent)" opacity="0.95"/>
+
+    <!-- W 字标（workbench） -->
+    <polyline points="260,360 408,712 512,372 616,712 764,360"
+              fill="none"
+              stroke="url(#wfill)"
+              stroke-width="92"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+
+    <!-- 底部模块色点（全部来自 wb-brand- 系列辅助色） -->
+    <circle cx="392" cy="824" r="26" fill="#22D3EE"/>
+    <circle cx="512" cy="824" r="26" fill="#A78BFA"/>
+    <circle cx="632" cy="824" r="26" fill="#60A5FA"/>
+  </g>
+</svg>

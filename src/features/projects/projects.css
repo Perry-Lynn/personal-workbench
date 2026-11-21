@@ -1,0 +1,4 @@
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+.projects-card { border: 1px solid var(--wb-border-l1); background: var(--wb-bg-surface); border-radius: 12px; padding: 16px; }
+.projects-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.projects-muted { color: var(--wb-text-tertiary); font-size: calc(var(--wb-font-base) - 3px); }

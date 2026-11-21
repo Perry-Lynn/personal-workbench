@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    风格二 · mono：极简单色。去掉所有品牌色，纯中性灰阶，低调不抢眼。
+    背景内缩到 82~942（四周留 ~8% 透明边距）—— 与 brand/prism 一致，
+    避免 Dock 里视觉上比旁边「透明背景 + 居中 logo」的程序显得更大。
+  -->
+  <defs>
+    <linearGradient id="bg" x1="82" y1="82" x2="942" y2="942" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#31343B"/>
+      <stop offset="1" stop-color="#14151A"/>
+    </linearGradient>
+    <radialGradient id="g1" cx="360" cy="320" r="540" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wf" x1="0" y1="383" x2="0" y2="635" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C9CCD4"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="0" y1="82" x2="0" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sq">
+      <rect x="82" y="82" width="860" height="860" rx="187" ry="187"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect x="82" y="82" width="860" height="860" fill="url(#bg)"/>
+    <rect x="82" y="82" width="860" height="860" fill="url(#g1)"/>
+    <rect x="82" y="82" width="860" height="170" fill="url(#sh)"/>
+    <rect x="372" y="235" width="280" height="12" rx="6" fill="#FFFFFF" opacity="0.55"/>
+    <polyline points="312,383 432,635 512,391 592,635 712,383"
+              fill="none" stroke="url(#wf)" stroke-width="76"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="412" cy="767" r="22" fill="#FFFFFF" opacity="0.90"/>
+    <circle cx="512" cy="767" r="22" fill="#FFFFFF" opacity="0.55"/>
+    <circle cx="612" cy="767" r="22" fill="#FFFFFF" opacity="0.30"/>
+  </g>
+</svg>

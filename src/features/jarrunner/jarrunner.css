@@ -1,0 +1,482 @@
+/*
+ * JAR 运行器模块 · 样式
+ * ------------------------------------------------------------------
+ * 两条与其它模块一致的规矩：
+ *   1. **不写死颜色**，一律走 --wb-* 令牌（换主题时整块跟着变）；
+ *   2. 字号用 calc(var(--wb-font-base) ± Npx)，跟着「设置 → 基准字号」走。
+ *
+ * 滚动归属：本模块是**文档式**（根节点不写高度），纵向滚动由面板负责；
+ * 只有运行记录与日志两块自己滚（它们有固定高度）。
+ * @Author: fu
+ */
+
+.jar-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px 24px;
+  font-size: calc(var(--wb-font-base) - 1px);
+  color: var(--wb-text-primary);
+}
+
+/* ===== 两栏布局 ===== */
+.jar-grid {
+  display: grid;
+  grid-template-columns: minmax(340px, 32%) 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .jar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ===== 卡片 ===== */
+.jar-card {
+  background: var(--wb-bg-surface);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 10px;
+  padding: 14px 16px 16px;
+}
+
+.jar-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: calc(var(--wb-font-base) + 1px);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.jar-card-note {
+  font-size: calc(var(--wb-font-base) - 2px);
+  font-weight: 400;
+}
+
+.jar-label {
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-secondary);
+  margin-bottom: 4px;
+}
+
+.jar-label-note {
+  margin-left: 4px;
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+.jar-hint {
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+/* ===== 表单 ===== */
+/* 表单本体现在是「基本 / 高级」两个页签（antd Tabs），字段铺在页签内容里 */
+.jar-form .ant-tabs-nav {
+  margin-bottom: 12px;
+}
+
+.jar-form-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jar-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * 标签行：右侧要挂「清除这个 jar 的参数历史」按钮，所以单独给一个修饰类，
+ * 不去动 .jar-label 本身 —— 其余十几格的标签都是纯文本，改成 flex 是没必要的波及。
+ */
+.jar-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.jar-arg-clear {
+  margin-left: auto;
+  color: var(--wb-text-tertiary);
+}
+
+/* 参数下拉里的候选：上面是完整参数串，下面一句人话说明它是干什么的 */
+.jar-arg-opt {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.jar-arg-opt-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-primary);
+  /* nowrap 是让弹层变宽的关键：弹层宽度不跟随输入框（见 ConfigForm 的 argPopup），
+     由内容撑开，而内容不换行才撑得开 */
+  white-space: nowrap;
+}
+
+.jar-arg-opt-note {
+  font-size: calc(var(--wb-font-base) - 3px);
+  color: var(--wb-text-tertiary);
+}
+
+/* 页签标签上的小点：高级里填过东西时要看得见（尤其自定义命令会让别的参数失效） */
+.jar-tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.jar-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--wb-brand);
+}
+
+.jar-adv-label {
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-secondary);
+}
+
+.jar-env {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jar-env-row {
+  display: grid;
+  grid-template-columns: 40% 1fr 32px;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ===== 拖放区 ===== */
+.jar-drop {
+  border: 1px dashed var(--wb-border-l2);
+  border-radius: 10px;
+  background: var(--wb-bg-secondary);
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.jar-drop:hover,
+.jar-drop-hover {
+  border-color: var(--wb-border-brand);
+  background: var(--wb-bg-active);
+}
+
+.jar-drop-title {
+  font-size: calc(var(--wb-font-base) + 1px);
+  font-weight: 600;
+}
+
+.jar-drop-path {
+  margin-top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  color: var(--wb-text-secondary);
+  word-break: break-all;
+}
+
+.jar-drop-hint {
+  margin-top: 6px;
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-tertiary);
+}
+
+/* ===== 命令预览 ===== */
+.jar-preview {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--wb-border-l1);
+}
+
+.jar-preview-cmd {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  background: var(--wb-bg-code);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.jar-ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ===== 已保存的配置 ===== */
+.jar-configs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.jar-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.jar-config-row:hover {
+  background: var(--wb-bg-hover);
+}
+
+.jar-config-row-active {
+  background: var(--wb-bg-selected);
+  border-color: var(--wb-border-brand);
+}
+
+.jar-config-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.jar-config-name {
+  font-size: calc(var(--wb-font-base) - 1px);
+}
+
+.jar-config-path {
+  font-size: calc(var(--wb-font-base) - 3px);
+  color: var(--wb-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== 运行记录 ===== */
+.jar-runs-wrap {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* 记录页里列表铺满：记录会越攒越多，挤在 280px 的小框里只能看到两三条 */
+.jar-runs-wrap-full {
+  max-height: calc(100vh - 300px);
+  min-height: 320px;
+}
+
+/*
+ * 「已保存的配置」与「运行记录」并列一排。
+ *
+ * 这两块原来各占一行（一个在左栏底、一个在右栏顶），而它们都只有几十像素高 ——
+ * 纵向空间白扔，右栏那一行还占着输出本可以用上的高度。并排之后右栏整列归输出。
+ *
+ * `align-items: stretch` 让两块等高（下边缘对齐才像「一排」）；运行记录那块
+ * 内容少，靠 `.jar-runs-card` 里的 `justify-content` 居中，免得空一大片在底部。
+ */
+.jar-pair {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.jar-pair > .jar-card {
+  min-width: 0;
+}
+
+.jar-pair > .jar-card:first-child {
+  flex: 1 1 auto;
+}
+
+.jar-runs-card {
+  flex: 0 0 auto;
+  width: 168px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 「运行记录」入口：一个按钮 + 一行统计，纵向排 */
+.jar-runs-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  text-align: center;
+}
+
+/* 记录页顶部：返回 + 统计 + 一句用法提示 */
+.jar-runs-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* 把后面的东西推到最右（卡片标题与记录页头部共用） */
+.jar-title-push {
+  margin-left: auto;
+}
+
+.jar-runs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jar-run {
+  padding: 10px 12px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  background: var(--wb-bg-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.jar-run:hover {
+  border-color: var(--wb-border-l2);
+}
+
+.jar-run-active {
+  border-color: var(--wb-border-brand);
+  background: var(--wb-bg-active);
+}
+
+.jar-run-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.jar-run-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jar-run-meta {
+  margin-top: 4px;
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-secondary);
+}
+
+.jar-run-cmd {
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  color: var(--wb-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jar-run-err {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+.jar-run-ops {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ===== 日志 ===== */
+.jar-log-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jar-log-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.jar-log-stat {
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-secondary);
+}
+
+.jar-log-stat-err {
+  color: var(--wb-error);
+}
+
+.jar-log-check {
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+
+/*
+ * 级别筛选下拉里的候选项：一个小色块 + 英文级别名。
+ *
+ * 色块用 `currentColor`，颜色来自元素上挂的 `log-level-<级别>` 类 —— 那是
+ * logsight.css 里给日志正文上色用的同一套（深浅两套色都定义好了）。
+ * 所以下拉里的颜色与列表里那一行的颜色必然一致，不用在这儿另抄一份色值。
+ */
+.jar-level-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jar-level-opt::before {
+  content: '';
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/*
+ * 日志查看器（复用 LogSight 那套）的容器。
+ *
+ * 这里**只**给列头与虚拟列表一个框，刻意不写 height：高度由 LogViewer 的
+ * `height` prop 决定（原因见 LogPane.tsx 文件头第 2 条）。两处都写高度就会打架，
+ * 而打架的表现是「列表比框矮一截」或「框被撑破」。
+ *
+ * `overflow: hidden` 是必需的：虚拟列表自己就是滚动容器，
+ * 外层要是也能滚，就会出现两条滚动条、且滚外层时列头会跟着跑。
+ */
+.jar-log-viewer {
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  background: var(--wb-bg-code);
+  overflow: hidden;
+}
+
+.jar-log-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jar-loading {
+  padding: 8px 2px;
+}

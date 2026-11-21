@@ -1,0 +1,86 @@
+[package]
+name = "workbench"
+version = "0.1.0"
+description = "个人工作台 - 可扩展的桌面工作台，功能以模块形式接入"
+authors = ["fu"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+# macos-private-api：磨砂玻璃（windowEffects）要求窗口 transparent，
+# 而 macOS 上 transparent 必须由这个特性 + 配置里的 macOSPrivateApi 一起开启。
+# 代价：使用私有 API 的应用无法上架 Mac App Store（个人工具无妨）。
+# tray-icon：把余额压成一行文字挂到系统菜单栏（见 core/tray.rs）。
+# 托盘在 Tauri 2 里是**特性门控**的，不开这个特性 TrayIconBuilder 根本不存在。
+tauri = { version = "2.0", features = ["macos-private-api", "tray-icon"] }
+# 单实例守卫：同 bundle id 启动第二份时，让第二份把参数交给第一份后立刻退出。
+# 不装它的后果见 core/storage.rs —— sled 是独占打开的，两份进程抢锁，
+# 后启动的那份读不到主密钥与全部设置，且报的是一句很吓人的原始 IO 错误。
+# ⚠️ 它必须**第一个**注册到 Builder（见 main.rs 里的注释说明）。
+tauri-plugin-single-instance = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-shell = "2.0"
+tauri-plugin-clipboard-manager = "2.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+# 必须 vendored：默认会动态链接 Homebrew 的 libssl/libcrypto，
+# 别人机器上没装 openssl@3 就直接 dyld 崩，且与 hardened runtime 的库校验冲突。
+ssh2 = { version = "*", features = ["vendored-openssl"] }
+keyring = { version = "3", features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust", "vendored"] }
+aes-gcm = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+sled = "0.34"
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+regex = "1"
+chrono = { version = "0.4", features = ["serde"] }
+futures-util = "0.3"
+tokio-util = { version = "0.7", features = ["codec"] }
+bytes = "1"
+base64 = "0.22"
+hex = "0.4"
+once_cell = "1"
+parking_lot = "0.12"
+shellexpand = "3"
+url = "2"
+quick-xml = "0.36"
+
+# AI-Passport 蓝牙（BLE 中心 / 客户端）
+btleplug = "0.11"
+# uuid 的 v4 特性原本是靠 btleplug 传递开启的，太脆 —— 片段库要自己生成 id，
+# 这里显式声明，免得哪天 btleplug 不再带这个特性就编译不过。
+# （cargo 特性是可加的，getrandom 本来就在依赖树里，不会多编译什么。）
+uuid = { version = "1", features = ["serde", "v4"] }
+
+# 智能体余额：调用各平台账单/用量接口（rustls 避免系统 openssl 依赖）
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+# 读取 ~/.codex/auth.json 等用户目录文件
+dirs = "5"
+# 余额「一键抓取网页登录态」：连本机 Chrome 的 CDP 通道（ws://127.0.0.1）。
+# 默认特性就是 connect + handshake（不含任何 TLS），正好够用 —— 本机回环走明文 ws。
+tokio-tungstenite = "0.24"
+
+# macOS 运行时切换 Dock 图标（设置页切换程序坞图标用）。
+# 用 NSApp.setApplicationIconImage_：改的是进程内的 NSImage，
+# 不会动 .app 里的 .icns；退出后系统读回 .icns 作为默认。
+# cocoa 0.26 不再 re-export class!/msg_send!，必须自己带 objc。
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.26"
+objc = "0.2"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

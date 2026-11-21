@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "个人工作台",
+  "version": "0.1.0",
+  "identifier": "com.fu.workbench",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "个人工作台",
+        "width": 1600,
+        "height": 980,
+        "minWidth": 1000,
+        "minHeight": 620,
+        "resizable": true,
+        "maximizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": true,
+        "tabbingIdentifier": "workbench-tabs",
+        "windowEffects": {
+          "effects": [
+            "underWindowBackground"
+          ],
+          "state": "followsWindowActiveState"
+        },
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
+      }
+    ],
+    "security": {
+      "csp": null,
+      "capabilities": [
+        "default"
+      ]
+    },
+    "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "DeveloperTool",
+    "shortDescription": "可扩展的桌面工作台",
+    "longDescription": "个人工作台是一个可扩展的桌面应用，功能以模块形式接入。当前内置 LogSight 模块（通过 SSH 连接远程服务器实时查看与分析日志）与 AI-Passport 模块（通过蓝牙连接 AI-Passport 徽章并推送通知）。",
+    "copyright": "Copyright © 2026 fu",
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "12.0",
+      "exceptionDomain": "",
+      "signingIdentity": "-",
+      "entitlements": null,
+      "infoPlist": "Info.plist"
+    }
+  },
+  "plugins": {}
+}

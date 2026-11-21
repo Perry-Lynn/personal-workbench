@@ -1,0 +1,159 @@
+/* 片段库模块样式（纯 token 驱动，跟随工作台深浅主题） */
+
+.snip-view {
+  padding: 20px 24px;
+  margin: 0;
+}
+
+.snip-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.snip-total {
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+/* ---- 列表 ---- */
+.snip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.snip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  background: var(--wb-bg-overlay);
+}
+
+/* 置顶的卡片左边加一条色带：一屏里能立刻看出哪几条被钉住了 */
+.snip-card-pinned {
+  border-left: 3px solid var(--wb-brand);
+}
+
+.snip-card-head,
+.snip-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 把右侧内容推到最右边；flex-wrap 下它自己会换行，不会把标签挤掉 */
+.snip-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.snip-title {
+  min-width: 0;
+  font-size: calc(var(--wb-font-base) + 1px);
+}
+
+.snip-pin {
+  color: var(--wb-text-tertiary);
+}
+.snip-pin-on {
+  color: var(--wb-brand);
+}
+
+/* ---- 正文预览 ---- */
+.snip-body {
+  padding: 10px 12px;
+  background: var(--wb-bg-code);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.6;
+  /* 长命令在窄窗口里横向滚，而不是把卡片撑破 */
+  overflow-x: auto;
+}
+
+/*
+ * 行首缩进必须保留：命令和配置的缩进是有意义的，用 white-space: pre。
+ * 每行末尾的空白在 previewLines 里已经去掉了，不会拖出一段看不见的横向滚动区。
+ */
+.snip-line {
+  white-space: pre;
+}
+
+.snip-more {
+  color: var(--wb-text-tertiary);
+  white-space: pre;
+}
+
+/* 命中高亮：只给背景色不给新字色，深浅两个主题下都保得住对比度 */
+.snip-mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: rgba(251, 191, 36, 0.32);
+  color: inherit;
+  font-weight: 600;
+}
+
+.snip-meta {
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+/* ---- 标签 ---- */
+.snip-lang {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 4px);
+  margin-inline-end: 0;
+}
+
+.snip-tag {
+  cursor: pointer;
+  margin-inline-end: 0;
+}
+
+.snip-filter-tag {
+  cursor: pointer;
+  user-select: none;
+  margin-inline-end: 0;
+}
+
+.snip-filter-on {
+  color: var(--wb-brand);
+  border-color: var(--wb-brand);
+}
+
+/* ---- 编辑弹窗 ---- */
+.snip-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.snip-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.snip-label {
+  font-size: calc(var(--wb-font-base) - 2px);
+  color: var(--wb-text-secondary);
+}
+
+.snip-hint {
+  font-size: calc(var(--wb-font-base) - 3px);
+}
+
+/* 标签预览占位固定高度：没有标签时不会让下面的正文跳一下 */
+.snip-tag-preview {
+  min-height: 24px;
+}
+
+.snip-body-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 2px);
+  line-height: 1.6;
+}

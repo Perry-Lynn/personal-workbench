@@ -1,0 +1,401 @@
+/*
+ * LogSight 模块样式
+ * ------------------------------------------------------------------
+ * 只放 LogSight 自己的东西：日志行渲染、结构化列、日志面板、连接表单等。
+ * 设计令牌统一用工作台核心变量 --wb-*（见 src/index.css），不在此处重复定义。
+ * 本文件由 src/features/logsight/index.tsx 导入，模块卸载即失效，不影响其它模块。
+ * @Author: fu
+ */
+
+/* =============================================
+   ====== 日志行字体 & 颜色 ======
+   ============================================= */
+.log-line-text {
+  font-family:
+    'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: var(--wb-log-font-size, 12.5px);
+  line-height: 1.6;
+  min-width: 0;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* 主日志消息：默认换行完整展示，由 measureRow 动态测量行高适配 react-window。 */
+.log-message-main {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ====== 深色模式：日志级别颜色（柔和调） ====== */
+html.dark .log-level-fatal { color: #FCA5A5; }
+html.dark .log-level-error { color: #FCA5A5; }
+html.dark .log-level-warn  { color: #FCD34D; }
+html.dark .log-level-info  { color: #93C5FD; }
+/*
+ * debug / trace 是最弱的两级，原来分别是 #64748B（base 上 4.1:1）和
+ * #94A3B8 + 0.8 透明度（合成后 5.2:1，但顺序反了 —— trace 比 debug 更亮）。
+ * 现在各归各位：debug #7A8798(5.4:1)、trace #717E90(4.8:1)，
+ * 两级都过 AA 4.5:1，且 trace 仍然明显淡于 debug。
+ */
+html.dark .log-level-debug { color: #7A8798; }
+html.dark .log-level-trace { color: #717E90; }
+html.dark .log-level-unknown { color: #CBD5E1; }
+
+/* ====== 浅色模式：日志级别颜色（沉稳清晰） ====== */
+html.light .log-level-fatal { color: #991B1B; }
+html.light .log-level-error { color: #DC2626; }
+html.light .log-level-warn  { color: #B45309; }
+html.light .log-level-info  { color: #2563EB; }
+/* debug 原 #64748B 在纸白底上 4.5:1 是擦线的，trace 原 #94A3B8 只有 2.4:1。
+   各压一档：debug #475569(7.1:1)、trace #5F6B7C(5.1:1)，顺序与深浅一致。 */
+html.light .log-level-debug { color: #475569; }
+html.light .log-level-trace { color: #5F6B7C; }
+html.light .log-level-unknown { color: #334155; }
+
+/* ====== 关键字高亮（柔和不刺眼） ====== */
+html.dark .kw-highlight {
+  background-color: rgba(52, 211, 153, 0.16);
+  color: #34D399;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+html.light .kw-highlight {
+  background-color: rgba(13, 148, 136, 0.12);
+  /* 与 --wb-text-brand 同值：原 #0D9488 在纸白底上只有 3.5:1，作文字偏淡 */
+  color: #0F766E;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* ====== 行号 ====== */
+html.dark .log-line-no {
+  color: var(--wb-text-tertiary);
+  text-align: right;
+  padding-right: 10px;
+  user-select: none;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  white-space: nowrap;
+}
+/* 行号槽 / 时间戳走全局令牌，不再各写一套硬编码灰：
+   深色侧本来就是 tertiary / secondary，浅色侧跟上即可，
+   令牌一提亮两边同时受益（浅色原来 #94A3B8 只有 2.4:1）。 */
+html.light .log-line-no {
+  color: var(--wb-text-tertiary);
+  text-align: right;
+  padding-right: 10px;
+  user-select: none;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  white-space: nowrap;
+}
+
+/* ====== 时间戳 ====== */
+html.dark .log-line-ts {
+  color: var(--wb-text-secondary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  padding-right: 14px;
+  white-space: nowrap;
+}
+html.light .log-line-ts {
+  color: var(--wb-text-secondary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  padding-right: 14px;
+  white-space: nowrap;
+}
+
+/* =============================================
+   ====== 结构化列：级别徽标 / traceId / logger ======
+   对应 logback pattern 的 %-5level / %X{traceId} / %logger{50}
+   ============================================= */
+.log-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-font-base) - 5.5px);
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+html.dark .log-level-badge.fatal { background: rgba(248, 113, 113, 0.18); color: #FCA5A5; }
+html.dark .log-level-badge.error { background: rgba(248, 113, 113, 0.15); color: #FCA5A5; }
+html.dark .log-level-badge.warn  { background: rgba(251, 191, 36, 0.15); color: #FCD34D; }
+html.dark .log-level-badge.info  { background: rgba(96, 165, 250, 0.14); color: #93C5FD; }
+html.dark .log-level-badge.debug { background: rgba(100, 116, 139, 0.18); color: #94A3B8; }
+/* 徽标底是半透明灰（比面板亮），所以文字要比行内级别色再提一档才够 4.5:1 */
+html.dark .log-level-badge.trace { background: rgba(100, 116, 139, 0.12); color: #7A8798; }
+html.dark .log-level-badge.unknown { background: rgba(100, 116, 139, 0.12); color: #7A8798; }
+html.light .log-level-badge.fatal { background: rgba(153, 27, 27, 0.10); color: #991B1B; }
+html.light .log-level-badge.error { background: rgba(220, 38, 38, 0.10); color: #DC2626; }
+html.light .log-level-badge.warn  { background: rgba(180, 83, 9, 0.12); color: #B45309; }
+html.light .log-level-badge.info  { background: rgba(37, 99, 235, 0.10); color: #2563EB; }
+html.light .log-level-badge.debug { background: rgba(100, 116, 139, 0.12); color: #475569; }
+html.light .log-level-badge.trace { background: rgba(148, 163, 184, 0.14); color: #5F6B7C; }
+html.light .log-level-badge.unknown { background: rgba(148, 163, 184, 0.14); color: #5F6B7C; }
+
+/* traceId 短码：等宽弱化，便于快速比对是否同一链路 */
+html.dark .log-trace {
+  color: #7C89A8;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 2px);
+  padding-right: 10px;
+  white-space: nowrap;
+}
+html.light .log-trace {
+  color: var(--wb-text-tertiary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 2px);
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+/* logger 缩写：等宽弱化，title 属性可看完整类名 */
+html.dark .log-logger {
+  color: #8B98B0;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 2px);
+  padding-right: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.light .log-logger {
+  color: var(--wb-text-tertiary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 2px);
+  padding-right: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 异常堆栈续行块：归属主行，缩进 + 左侧竖线 */
+html.dark .log-stack {
+  margin-top: 2px;
+  padding: 3px 0 3px 10px;
+  border-left: 2px solid rgba(148, 163, 184, 0.28);
+  background: rgba(226, 232, 240, 0.03);
+  color: #94A3B8;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+html.light .log-stack {
+  margin-top: 2px;
+  padding: 3px 0 3px 10px;
+  border-left: 2px solid rgba(100, 116, 139, 0.25);
+  background: rgba(15, 23, 42, 0.02);
+  color: var(--wb-text-secondary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-log-font-size, 12.5px) - 1px);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* “+N 行堆栈”折叠提示 */
+html.dark .log-stack-hint {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+  color: #94A3B8;
+  font-size: calc(var(--wb-font-base) - 5px);
+  line-height: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+html.light .log-stack-hint {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.10);
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 5px);
+  line-height: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 展开/收起三角箭头 */
+.log-twisty {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 6px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.log-twisty:hover { color: var(--wb-text-secondary); }
+
+/* 日志虚拟列表使用更宽的专用滚动条，便于鼠标拖动。 */
+.logsight-log-viewport > div::-webkit-scrollbar {
+  width: 14px;
+  height: 12px;
+}
+.logsight-log-viewport > div::-webkit-scrollbar-track {
+  background: var(--wb-bg-overlay);
+}
+.logsight-log-viewport > div::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--wb-text-tertiary) 58%, transparent);
+  background-clip: padding-box;
+}
+.logsight-log-viewport > div::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--wb-text-secondary) 78%, transparent);
+  background-clip: padding-box;
+}
+
+/* =============================================
+   ====== 模块布局安全模式 ======
+   工作台外壳已提供 100% 高度容器，模块内部只需撑满不再重复 100vh
+   ============================================= */
+.logsight-root-layout,
+.logsight-root-layout > .ant-layout {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.logsight-tab-bar {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.logsight-tab-bar .ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* =============================================
+   ====== 连接表单标签页样式 ======
+   ============================================= */
+.auth-tab-pill {
+  display: inline-flex;
+  border: 1px solid var(--wb-border-l2);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--wb-bg-overlay);
+}
+.auth-tab-pill button {
+  border: none;
+  padding: 6px 16px;
+  background: transparent;
+  color: var(--wb-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: calc(var(--wb-font-base) - 2px);
+}
+.auth-tab-pill button.active {
+  background: var(--wb-brand);
+  color: var(--wb-text-inverse);
+  font-weight: 500;
+}
+.auth-tab-pill button:not(.active):hover {
+  background: var(--wb-bg-hover);
+  color: var(--wb-text-primary);
+}
+
+/* =============================================
+   ====== 品牌按钮辉光 ======
+   ============================================= */
+.logsight-btn-primary-glow {
+  box-shadow: var(--wb-shadow-btn) !important;
+}
+
+/* =============================================
+   ====== 日志面板背景 ======
+   ============================================= */
+html.dark .log-panel-bg {
+  background-color: var(--wb-bg-code);
+}
+html.light .log-panel-bg {
+  background-color: var(--wb-bg-code);
+}
+
+/* =============================================
+   ====== 顶部 Logo 渐变徽章（与图标配色一致） ======
+   ============================================= */
+html.dark .logsight-logo-badge {
+  background: linear-gradient(135deg, #064E3B 0%, #047857 50%, #34D399 100%);
+}
+html.light .logsight-logo-badge {
+  background: linear-gradient(135deg, #0F766E 0%, #0D9488 50%, #14B8A6 100%);
+}
+
+/* =============================================
+   ====== 日志列头 ======
+   ============================================= */
+.log-column-header {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, monospace;
+  font-size: calc(var(--wb-font-base) - 4px);
+  color: var(--wb-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.log-col-label {
+  position: relative;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.log-col-label-text {
+  pointer-events: none;
+}
+
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  cursor: col-resize;
+  z-index: 2;
+}
+.col-resize-handle:hover {
+  background: var(--wb-border-brand);
+}
+
+.log-col-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--wb-text-tertiary);
+  cursor: pointer;
+  font-size: calc(var(--wb-font-base) - 3px);
+  margin-left: 4px;
+  transition: all 0.15s;
+}
+.log-col-settings-btn:hover {
+  background: var(--wb-bg-hover);
+  color: var(--wb-text-secondary);
+}

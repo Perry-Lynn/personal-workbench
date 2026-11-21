@@ -1,0 +1,58 @@
+/*
+ * JVM 与 Spring · 标签栏
+ * ------------------------------------------------------------------
+ * 两个视图各自带 20px 24px 的内边距，所以标签栏自己只用左右 24px 对齐，
+ * 上下收窄一点，别在页面上多出一条「厚」的分区。
+ *
+ * sticky 是必需的：模块面板（ModuleHost）是滚动容器，进程多的时候标签栏
+ * 必须一直看得见，否则切个视图还得先滚回顶部。
+ * 底色必须显式给 --wb-bg-base —— 否则内容会从标签栏底下透出来。
+ * @Author: fu
+ */
+
+.jvm-module {
+  /* 文档式模块：根节点不设高度，滚动交给 ModuleHost 的面板 */
+  padding: 0;
+}
+
+.jvm-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 24px 7px;
+  border-bottom: 1px solid var(--wb-border-l1);
+  background-color: var(--wb-bg-base);
+}
+
+.jvm-tab {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--wb-text-secondary);
+  font-family: inherit;
+  font-size: calc(var(--wb-font-base) - 2px);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.jvm-tab:hover {
+  background-color: var(--wb-bg-hover);
+  color: var(--wb-text-primary);
+}
+
+.jvm-tab.is-active {
+  background-color: var(--wb-bg-selected);
+  color: var(--wb-text-brand);
+}
+
+/* 切换标签页时的加载态：给一点高度，避免整个页面先塌成一条 */
+.jvm-pane-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+}

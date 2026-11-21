@@ -1,0 +1,49 @@
+{
+  "name": "workbench",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "个人工作台 - 可扩展的桌面工作台，功能以模块形式接入",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test:logic": "esbuild scripts/logic-test.ts --bundle --platform=node --format=esm --alias:@=./src --outfile=node_modules/.cache/logic-test.mjs --log-level=warning && node node_modules/.cache/logic-test.mjs",
+    "check:labels": "node scripts/check-label-contract.mjs",
+    "check:git-theme": "node scripts/check-git-theme.mjs",
+    "scan:dead": "node scripts/scan-dead-exports.mjs",
+    "tauri": "tauri",
+    "tauri:dev": "pkill -f 'MacOS/workbench' 2>/dev/null; tauri dev",
+    "tauri:restart": "lsof -ti:1420 | xargs kill -9 2>/dev/null; pkill -9 -f 'target/debug/workbench' 2>/dev/null; pkill -9 -f 'cargo run' 2>/dev/null; pkill -f 'MacOS/workbench' 2>/dev/null; while lsof -ti:1420 >/dev/null 2>&1; do sleep 0.5; done; tauri dev",
+    "tauri:build": "tauri build && rm -rf src-tauri/target/release/bundle/macos/*.app",
+    "tauri:ble": "tauri build --debug --bundles app && (pkill -f 'MacOS/workbench' || true) && sleep 1 && open \"$PWD/src-tauri/target/debug/bundle/macos/个人工作台.app\"",
+    "app:install": "pkill -f 'MacOS/workbench'; sleep 1; ditto \"$PWD/src-tauri/target/debug/bundle/macos/个人工作台.app\" \"/Applications/个人工作台.app\" && open \"/Applications/个人工作台.app\""
+  },
+  "dependencies": {
+    "@ant-design/icons": "6.3.2",
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-clipboard-manager": "2.3.3",
+    "@tauri-apps/plugin-dialog": "2.7.2",
+    "@tauri-apps/plugin-shell": "2.3.5",
+    "antd": "6.6.1",
+    "dayjs": "1.11.23",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "5.0.15"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@types/react-window": "1.8.8",
+    "@vitejs/plugin-react": "6.1.0",
+    "autoprefixer": "10.5.4",
+    "esbuild": "0.28.2",
+    "postcss": "8.5.26",
+    "react-window": "1.8.11",
+    "tailwindcss": "3.4.19",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}

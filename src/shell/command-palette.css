@@ -1,0 +1,217 @@
+/*
+ * 全局命令面板样式
+ * ------------------------------------------------------------------
+ * 面板是「浮在内容之上的一层」，所以底色取 --wb-overlay-*（与 Tooltip / Popover
+ * 同一套取值）：深色下比面板更亮一档、浅色下是纯白，两者都能和背后的内容分开。
+ *
+ * 字号一律走 --wb-font-base 的加减，跟工作台其它地方同一个缩放口径。
+ * 动画只做 120~140ms 的淡入 + 轻微上浮：命令面板的观感应该是「立刻可用」，
+ * 不是「演一段动画给你看」。
+ * @Author: fu
+ */
+
+.cmdk-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 13vh;
+  background-color: rgba(0, 0, 0, 0.38);
+  animation: cmdk-fade 0.12s ease-out;
+}
+
+html.light .cmdk-scrim {
+  background-color: rgba(16, 24, 40, 0.22);
+}
+
+.cmdk-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(620px, calc(100vw - 56px));
+  max-height: 62vh;
+  overflow: hidden;
+  border: 1px solid var(--wb-border-l2);
+  border-radius: 12px;
+  background-color: var(--wb-overlay-bg);
+  color: var(--wb-overlay-text);
+  box-shadow: var(--wb-shadow-float);
+  animation: cmdk-rise 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ---- 输入行 ---- */
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--wb-border-l1);
+}
+
+.cmdk-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--wb-text-primary);
+  font-family: inherit;
+  font-size: calc(var(--wb-font-base) + 1px);
+  line-height: 1.6;
+}
+
+.cmdk-input::placeholder {
+  color: var(--wb-text-tertiary);
+}
+
+/* ---- 结果列表 ---- */
+.cmdk-list {
+  flex: 1;
+  min-height: 0;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cmdk-section {
+  padding: 8px 10px 4px;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+  letter-spacing: 0.06em;
+}
+
+.cmdk-item {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cmdk-item.is-active {
+  background-color: var(--wb-bg-selected);
+}
+
+.cmdk-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wb-text-secondary);
+  font-size: calc(var(--wb-font-base) + 1px);
+}
+
+.cmdk-item.is-active .cmdk-item-icon {
+  color: var(--wb-text-brand);
+}
+
+.cmdk-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cmdk-item-title {
+  color: var(--wb-text-primary);
+  font-size: calc(var(--wb-font-base) - 0.5px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmdk-item-preview {
+  color: var(--wb-text-tertiary);
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmdk-item-meta {
+  max-width: 42%;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 3px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmdk-empty {
+  padding: 30px 16px;
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 1px);
+  text-align: center;
+}
+
+/* ---- 底部提示 ---- */
+.cmdk-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--wb-border-l1);
+  color: var(--wb-text-tertiary);
+  font-size: calc(var(--wb-font-base) - 4px);
+}
+
+.cmdk-foot-hint {
+  margin-left: auto;
+}
+
+.cmdk-kbd {
+  display: inline-block;
+  min-width: 16px;
+  margin-right: 3px;
+  padding: 0 4px;
+  border: 1px solid var(--wb-border-l2);
+  border-radius: 4px;
+  background-color: var(--wb-bg-overlay);
+  color: var(--wb-text-secondary);
+  font-family: inherit;
+  font-size: calc(var(--wb-font-base) - 5px);
+  line-height: 15px;
+  text-align: center;
+}
+
+/* 输入行右侧那个 esc：不要右边距 */
+.cmdk-input-row .cmdk-kbd {
+  margin-right: 0;
+}
+
+@keyframes cmdk-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cmdk-rise {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdk-scrim,
+  .cmdk-panel {
+    animation: none;
+  }
+}

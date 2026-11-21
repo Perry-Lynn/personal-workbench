@@ -1,0 +1,32 @@
+/* JVM 进程看板模块样式（纯 token 驱动，跟随工作台深浅主题） */
+
+.jvm-view {
+  padding: 20px 24px;
+  /*
+   * 不设 max-width —— 表格横向滚动由 AntD Table 自己控制（操作列 fixed right），
+   * 外层容器应填满模块宿主给的可用空间；硬塞 max-width 反而会把右侧的「操作」列
+   * 挤进横向滚动条看不见的地方。
+   */
+  margin: 0;
+}
+
+/*
+ * 线程栈弹窗的正文。
+ * 必须限高滚动：一次 jstack 动辄几千行，不限高的话弹窗会被撑到屏幕外，
+ * 而「关闭」按钮在最底下 —— 用户会以为应用卡死了。
+ */
+.jvm-dump {
+  max-height: 60vh;
+  overflow: auto;
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--wb-bg-code);
+  border: 1px solid var(--wb-border-l1);
+  border-radius: 8px;
+  color: var(--wb-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: calc(var(--wb-font-base) - 3px);
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 4;
+}

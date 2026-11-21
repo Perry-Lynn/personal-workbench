@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    风格三 · prism：棱镜多彩。W 字标走彩虹渐变，活泼有辨识度。
+    背景内缩到 82~942（四周留 ~8% 透明边距）—— 与 brand/mono 一致，
+    避免 Dock 里视觉上比旁边「透明背景 + 居中 logo」的程序显得更大。
+  -->
+  <defs>
+    <linearGradient id="bg" x1="82" y1="82" x2="942" y2="942" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#241C46"/>
+      <stop offset="1" stop-color="#0A0A18"/>
+    </linearGradient>
+    <radialGradient id="g1" cx="340" cy="300" r="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA" stop-opacity="0.50"/>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="740" cy="760" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FB7185" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#FB7185" stop-opacity="0"/>
+    </radialGradient>
+    <!-- W 字标走彩虹渐变 -->
+    <linearGradient id="wf" x1="300" y1="383" x2="724" y2="635" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5EEAD4"/>
+      <stop offset="0.35" stop-color="#A78BFA"/>
+      <stop offset="0.70" stop-color="#FB7185"/>
+      <stop offset="1" stop-color="#FBBF24"/>
+    </linearGradient>
+    <linearGradient id="ac" x1="82" y1="0" x2="942" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5EEAD4"/>
+      <stop offset="0.34" stop-color="#A78BFA"/>
+      <stop offset="0.67" stop-color="#FB7185"/>
+      <stop offset="1" stop-color="#FBBF24"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="0" y1="82" x2="0" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sq">
+      <rect x="82" y="82" width="860" height="860" rx="187" ry="187"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect x="82" y="82" width="860" height="860" fill="url(#bg)"/>
+    <rect x="82" y="82" width="860" height="860" fill="url(#g1)"/>
+    <rect x="82" y="82" width="860" height="860" fill="url(#g2)"/>
+    <rect x="82" y="82" width="860" height="170" fill="url(#sh)"/>
+    <rect x="372" y="235" width="280" height="12" rx="6" fill="url(#ac)" opacity="0.95"/>
+    <polyline points="312,383 432,635 512,391 592,635 712,383"
+              fill="none" stroke="url(#wf)" stroke-width="76"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="412" cy="767" r="22" fill="#5EEAD4"/>
+    <circle cx="512" cy="767" r="22" fill="#A78BFA"/>
+    <circle cx="612" cy="767" r="22" fill="#FB7185"/>
+  </g>
+</svg>

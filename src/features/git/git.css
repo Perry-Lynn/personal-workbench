@@ -1,0 +1,263 @@
+/*
+ * Git 管理模块 · 模块样式
+ * ------------------------------------------------------------------
+ * 两条硬规则（改这个文件时请守住）：
+ *
+ *   1. **字号只来自下面的 .git-fs-* 四档**，任何组件类里都不写 font-size。
+ *      四档全部由 --wb-font-base 派生 —— 设置页把基准字号从 13 调到 18 时，
+ *      本模块整体一起变，不会出现「有的跟着变、有的纹丝不动」。
+ *      例外只有 .git-caret（0.68em）：按父级字号等比缩放，永远与旁边文字成比例。
+ *
+ *   2. **颜色只来自 --wb-* 令牌**（或 Tailwind 的 wb-* 类），深浅主题各一档。
+ *      只有 type diff 的红绿大块底色需要透明度，那种才写 rgba，并且两套主题各写一份。
+ *      ⚠️ Tailwind 的 colors 里只映射了 wb-text 的 primary/secondary/tertiary，
+ *      写 text-wb-text-quaternary 会被**静默忽略**（类名不存在 → 不报错 → 只是没生效）。
+ *
+ * 为什么不用 Tailwind 的 text-xs / text-sm 当字号：它们是**固定 px**（12 / 14），
+ * 与 --wb-font-base 无关 —— 基准字号一改，同一个面板里就会并存两种节奏。
+ * @Author: fu
+ */
+
+/* ===== 字号阶梯（本模块唯一来源） =====
+ * 各档间距刻意压到 1px，并与全应用主力档（--wb-font-base - 2px / - 3px）对齐：
+ *   lg  空态 / 落地页主标题
+ *   md  列表正文：文件名、提交说明、分支名；提交信息输入
+ *   sm  diff 正文、目录名、路径、分组标题、按钮、行号
+ *   xs  元信息：hash、作者、时间、分支标签、计数、提示、图标
+ *
+ * 定义成变量而不是散落的 calc()：下面那些「自带尺寸」的组件类
+ * （计数胶囊、分支标签、图标按钮、分组标题、哈希列…）直接引用同一批变量，
+ * 于是阶梯只有一处定义 —— 改动时不可能漏掉某一个，也不会出现
+ * 「某个小标签忘了挂字号类 → 继承成 16px 正文大小」这种静默跑偏。
+ */
+:root {
+  --git-fs-lg: calc(var(--wb-font-base) - 1px);
+  --git-fs-md: calc(var(--wb-font-base) - 2px);
+  --git-fs-sm: calc(var(--wb-font-base) - 3px);
+  --git-fs-xs: calc(var(--wb-font-base) - 4px);
+}
+.git-fs-lg {
+  font-size: var(--git-fs-lg);
+}
+.git-fs-md {
+  font-size: var(--git-fs-md);
+}
+.git-fs-sm {
+  font-size: var(--git-fs-sm);
+}
+.git-fs-xs {
+  font-size: var(--git-fs-xs);
+}
+
+/*
+ * 展开/折叠、下拉的小箭头。
+ * 直接用最弱一档字号，而不是再按比例缩一档：
+ * 按 0.7 倍算时，基准字号调到最小的 13px 后箭头只剩 7px，基本看不见了。
+ * 用 xs 档则每档都清晰（base 13/16/18 → 9/12/14px），且宽度用 em 跟着一起变。
+ */
+.git-caret {
+  font-size: var(--git-fs-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4em;
+}
+
+/* ===== 双栏 Diff 行底色（带透明度的大块色，深浅各一档） ===== */
+html.light .git-diff-add {
+  background: rgba(5, 150, 105, 0.13);
+}
+html.light .git-diff-del {
+  background: rgba(220, 38, 38, 0.12);
+}
+html.light .git-diff-empty {
+  background: rgba(16, 24, 40, 0.03);
+}
+html.dark .git-diff-add {
+  background: rgba(52, 211, 153, 0.15);
+}
+html.dark .git-diff-del {
+  background: rgba(248, 113, 113, 0.15);
+}
+html.dark .git-diff-empty {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* hunk 头（@@ -1,5 +1,6 @@）：与内容拉开但不抢眼 */
+.git-hunk-head {
+  background: var(--wb-bg-secondary);
+  color: var(--wb-text-tertiary);
+  border-top: 1px solid var(--wb-border-l1);
+  border-bottom: 1px solid var(--wb-border-l1);
+}
+
+/* Diff 正文：等宽 + 长行软换行（左右两栏走网格对齐，换行不会错位）
+ * line-height 用无单位倍数（跟着字号等比）而不是固定 20px ——
+ * 固定值在基准字号调到 18 时会显得挤；行号槽用同一个倍数，两列才对齐。 */
+.git-diff-text {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: var(--git-fs-sm);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  tab-size: 4;
+}
+
+/* 行号槽：弱化、右对齐、不响应选中（行号属于装饰性弱信息，用最弱一档文字色） */
+.git-line-no {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: var(--git-fs-sm);
+  line-height: 1.55;
+  color: var(--wb-text-quaternary);
+  text-align: right;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ===== 提交图 ===== */
+.git-graph-row {
+  /* 选中态左侧留一条品牌色竖条：比整行变色更克制，和 IDEA 的列表选中一致 */
+  box-shadow: inset 0 0 0 0 transparent;
+  transition: background 0.1s ease;
+}
+.git-graph-row:hover {
+  background: var(--wb-bg-hover);
+}
+.git-graph-row.is-selected {
+  background: var(--wb-bg-selected);
+  box-shadow: inset 2px 0 0 0 var(--wb-brand);
+}
+
+/* 提交行的四段文本（hash / 说明 / 元信息 / 分支标签）——尺寸各自取自阶梯变量 */
+.git-hash {
+  /* 用 em 而不是固定 62px：基准字号调大时哈希列跟着变宽，不会把说明挤没 */
+  width: 4.8em;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: var(--git-fs-xs);
+  color: var(--wb-text-tertiary);
+  letter-spacing: 0.2px;
+}
+.git-subject {
+  font-size: var(--git-fs-md);
+  color: var(--wb-text-primary);
+  padding-right: 8px;
+}
+.git-meta {
+  font-size: var(--git-fs-xs);
+  color: var(--wb-text-tertiary);
+  padding-left: 10px;
+  /* 作者名可能很长：限宽 + 省略号，避免把提交说明挤没 */
+  max-width: 140px;
+}
+
+/*
+ * 分支/标签胶囊（IDEA 的蓝底小标签）。
+ * 文字色直接取令牌（--wb-info / --wb-brand），底色的透明度仍要手写 rgba：
+ * 令牌是不透明的实色，而胶囊底色需要淡一档，只能在这儿按主题各配一份。
+ * （不用 color-mix：旧 WKWebView 不保证支持，失效时底色会整块消失。）
+ */
+.git-chip {
+  display: inline-block;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 6px 3px;
+  margin-right: 5px;
+  border-radius: 4px;
+  font-size: var(--git-fs-xs);
+  line-height: 1.2;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--wb-info);
+}
+html.light .git-chip {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.26);
+}
+html.dark .git-chip {
+  background: rgba(96, 165, 250, 0.14);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+.git-chip.is-hot {
+  color: var(--wb-brand);
+}
+html.light .git-chip.is-hot {
+  background: rgba(13, 148, 136, 0.1);
+  border-color: rgba(13, 148, 136, 0.3);
+}
+html.dark .git-chip.is-hot {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(52, 211, 153, 0.32);
+}
+
+/* ===== 列表行（变更 / 分支） ===== */
+.git-row {
+  transition: background 0.1s ease;
+}
+.git-row:hover {
+  background: var(--wb-bg-hover);
+}
+.git-row.is-selected {
+  background: var(--wb-bg-selected);
+  box-shadow: inset 2px 0 0 0 var(--wb-brand);
+}
+
+/* 分组小标题（已暂存 / 未暂存 / 本地 / 远端…） */
+.git-section-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: var(--git-fs-sm);
+  font-weight: 500;
+  color: var(--wb-text-secondary);
+  background: var(--wb-bg-secondary);
+  border-bottom: 1px solid var(--wb-border-l1);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* 小计数胶囊（尺寸用 em：跟着字号一起变，不写死 px） */
+.git-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5em;
+  height: 1.5em;
+  padding: 0 0.4em;
+  border-radius: 1em;
+  font-size: var(--git-fs-xs);
+  line-height: 1;
+  color: var(--wb-text-secondary);
+  background: var(--wb-bg-overlay);
+}
+
+/* 小图标按钮（方形、hover 出底）：目录树的一键展开/折叠、视图切换都用它 */
+.git-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7em;
+  height: 1.7em;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--wb-text-tertiary);
+  font-size: var(--git-fs-xs);
+  line-height: 1;
+}
+.git-icon-btn:hover {
+  color: var(--wb-text-primary);
+  background: var(--wb-bg-hover);
+}
+
+/* 提交信息输入框：对齐 IDEA 的紧凑节奏 */
+.git-commit-msg textarea {
+  font-size: var(--git-fs-md);
+  line-height: 1.5;
+  resize: none;
+}
